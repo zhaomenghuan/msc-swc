@@ -10,8 +10,21 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi        = "2"
+napi = "2"
 napi-derive = "2"
+swc_core = { version = "0.86.81", features = [
+  "allocator_node",
+  "ecma_ast",
+  "ecma_codegen",
+  "ecma_ast_serde",
+  "common_concurrent",
+  "bundler",
+  "ecma_loader",
+  "ecma_transforms",
+  "ecma_visit",
+  "base_node",
+  "base_concurrent",
+] }
 
 [build-dependencies]
 napi-build = "2"

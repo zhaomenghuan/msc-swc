@@ -1,3 +1,3 @@
-# `msc-swc-linux-x64-musl`
+# `@msc-studio/swc-linux-x64-musl`
 
-This is the **x86_64-unknown-linux-musl** binary for `msc-swc`
+This is the **x86_64-unknown-linux-musl** binary for `@msc-studio/swc`

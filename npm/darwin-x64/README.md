@@ -1,3 +1,3 @@
-# `msc-swc-darwin-x64`
+# `@msc-studio/swc-darwin-x64`
 
-This is the **x86_64-apple-darwin** binary for `msc-swc`
+This is the **x86_64-apple-darwin** binary for `@msc-studio/swc`

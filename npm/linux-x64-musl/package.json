@@ -1,15 +1,15 @@
 {
-  "name": "msc-swc-linux-x64-musl",
-  "version": "0.0.1",
+  "name": "@msc-studio/swc-linux-x64-musl",
+  "version": "0.1.0",
   "os": [
     "linux"
   ],
   "cpu": [
     "x64"
   ],
-  "main": "msc-swc.linux-x64-musl.node",
+  "main": "swc.linux-x64-musl.node",
   "files": [
-    "msc-swc.linux-x64-musl.node"
+    "swc.linux-x64-musl.node"
   ],
   "description": "msc swc package with napi-rs",
   "keywords": [

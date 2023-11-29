@@ -1,8 +1,8 @@
 [package]
-authors = ["LongYinan <lynweklm@gmail.com>"]
-edition = "2021"
-name    = "msc_swc"
+name = "msc_swc"
 version = "0.1.0"
+authors = ["zhaomenghuan <zhaomenghuan@foxmail.com>"]
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

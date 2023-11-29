@@ -32,24 +32,24 @@ switch (platform) {
   case 'android':
     switch (arch) {
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.android-arm64.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.android-arm64.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.android-arm64.node');
+            nativeBinding = require('./swc.android-arm64.node');
           } else {
-            nativeBinding = require('msc-swc-android-arm64');
+            nativeBinding = require('@msc-studio/swc-android-arm64');
           }
         } catch (e) {
           loadError = e;
         }
         break;
       case 'arm':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.android-arm-eabi.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.android-arm-eabi.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.android-arm-eabi.node');
+            nativeBinding = require('./swc.android-arm-eabi.node');
           } else {
-            nativeBinding = require('msc-swc-android-arm-eabi');
+            nativeBinding = require('@msc-studio/swc-android-arm-eabi');
           }
         } catch (e) {
           loadError = e;
@@ -62,36 +62,36 @@ switch (platform) {
   case 'win32':
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.win32-x64-msvc.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.win32-x64-msvc.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.win32-x64-msvc.node');
+            nativeBinding = require('./swc.win32-x64-msvc.node');
           } else {
-            nativeBinding = require('msc-swc-win32-x64-msvc');
+            nativeBinding = require('@msc-studio/swc-win32-x64-msvc');
           }
         } catch (e) {
           loadError = e;
         }
         break;
       case 'ia32':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.win32-ia32-msvc.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.win32-ia32-msvc.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.win32-ia32-msvc.node');
+            nativeBinding = require('./swc.win32-ia32-msvc.node');
           } else {
-            nativeBinding = require('msc-swc-win32-ia32-msvc');
+            nativeBinding = require('@msc-studio/swc-win32-ia32-msvc');
           }
         } catch (e) {
           loadError = e;
         }
         break;
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.win32-arm64-msvc.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.win32-arm64-msvc.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.win32-arm64-msvc.node');
+            nativeBinding = require('./swc.win32-arm64-msvc.node');
           } else {
-            nativeBinding = require('msc-swc-win32-arm64-msvc');
+            nativeBinding = require('@msc-studio/swc-win32-arm64-msvc');
           }
         } catch (e) {
           loadError = e;
@@ -102,35 +102,35 @@ switch (platform) {
     }
     break;
   case 'darwin':
-    localFileExisted = existsSync(join(__dirname, 'msc-swc.darwin-universal.node'));
+    localFileExisted = existsSync(join(__dirname, 'swc.darwin-universal.node'));
     try {
       if (localFileExisted) {
-        nativeBinding = require('./msc-swc.darwin-universal.node');
+        nativeBinding = require('./swc.darwin-universal.node');
       } else {
-        nativeBinding = require('msc-swc-darwin-universal');
+        nativeBinding = require('@msc-studio/swc-darwin-universal');
       }
       break;
     } catch {}
     switch (arch) {
       case 'x64':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.darwin-x64.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.darwin-x64.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.darwin-x64.node');
+            nativeBinding = require('./swc.darwin-x64.node');
           } else {
-            nativeBinding = require('msc-swc-darwin-x64');
+            nativeBinding = require('@msc-studio/swc-darwin-x64');
           }
         } catch (e) {
           loadError = e;
         }
         break;
       case 'arm64':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.darwin-arm64.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.darwin-arm64.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.darwin-arm64.node');
+            nativeBinding = require('./swc.darwin-arm64.node');
           } else {
-            nativeBinding = require('msc-swc-darwin-arm64');
+            nativeBinding = require('@msc-studio/swc-darwin-arm64');
           }
         } catch (e) {
           loadError = e;
@@ -144,12 +144,12 @@ switch (platform) {
     if (arch !== 'x64') {
       throw new Error(`Unsupported architecture on FreeBSD: ${arch}`);
     }
-    localFileExisted = existsSync(join(__dirname, 'msc-swc.freebsd-x64.node'));
+    localFileExisted = existsSync(join(__dirname, 'swc.freebsd-x64.node'));
     try {
       if (localFileExisted) {
-        nativeBinding = require('./msc-swc.freebsd-x64.node');
+        nativeBinding = require('./swc.freebsd-x64.node');
       } else {
-        nativeBinding = require('msc-swc-freebsd-x64');
+        nativeBinding = require('@msc-studio/swc-freebsd-x64');
       }
     } catch (e) {
       loadError = e;
@@ -159,23 +159,23 @@ switch (platform) {
     switch (arch) {
       case 'x64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'msc-swc.linux-x64-musl.node'));
+          localFileExisted = existsSync(join(__dirname, 'swc.linux-x64-musl.node'));
           try {
             if (localFileExisted) {
-              nativeBinding = require('./msc-swc.linux-x64-musl.node');
+              nativeBinding = require('./swc.linux-x64-musl.node');
             } else {
-              nativeBinding = require('msc-swc-linux-x64-musl');
+              nativeBinding = require('@msc-studio/swc-linux-x64-musl');
             }
           } catch (e) {
             loadError = e;
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'msc-swc.linux-x64-gnu.node'));
+          localFileExisted = existsSync(join(__dirname, 'swc.linux-x64-gnu.node'));
           try {
             if (localFileExisted) {
-              nativeBinding = require('./msc-swc.linux-x64-gnu.node');
+              nativeBinding = require('./swc.linux-x64-gnu.node');
             } else {
-              nativeBinding = require('msc-swc-linux-x64-gnu');
+              nativeBinding = require('@msc-studio/swc-linux-x64-gnu');
             }
           } catch (e) {
             loadError = e;
@@ -184,23 +184,23 @@ switch (platform) {
         break;
       case 'arm64':
         if (isMusl()) {
-          localFileExisted = existsSync(join(__dirname, 'msc-swc.linux-arm64-musl.node'));
+          localFileExisted = existsSync(join(__dirname, 'swc.linux-arm64-musl.node'));
           try {
             if (localFileExisted) {
-              nativeBinding = require('./msc-swc.linux-arm64-musl.node');
+              nativeBinding = require('./swc.linux-arm64-musl.node');
             } else {
-              nativeBinding = require('msc-swc-linux-arm64-musl');
+              nativeBinding = require('@msc-studio/swc-linux-arm64-musl');
             }
           } catch (e) {
             loadError = e;
           }
         } else {
-          localFileExisted = existsSync(join(__dirname, 'msc-swc.linux-arm64-gnu.node'));
+          localFileExisted = existsSync(join(__dirname, 'swc.linux-arm64-gnu.node'));
           try {
             if (localFileExisted) {
-              nativeBinding = require('./msc-swc.linux-arm64-gnu.node');
+              nativeBinding = require('./swc.linux-arm64-gnu.node');
             } else {
-              nativeBinding = require('msc-swc-linux-arm64-gnu');
+              nativeBinding = require('@msc-studio/swc-linux-arm64-gnu');
             }
           } catch (e) {
             loadError = e;
@@ -208,12 +208,12 @@ switch (platform) {
         }
         break;
       case 'arm':
-        localFileExisted = existsSync(join(__dirname, 'msc-swc.linux-arm-gnueabihf.node'));
+        localFileExisted = existsSync(join(__dirname, 'swc.linux-arm-gnueabihf.node'));
         try {
           if (localFileExisted) {
-            nativeBinding = require('./msc-swc.linux-arm-gnueabihf.node');
+            nativeBinding = require('./swc.linux-arm-gnueabihf.node');
           } else {
-            nativeBinding = require('msc-swc-linux-arm-gnueabihf');
+            nativeBinding = require('@msc-studio/swc-linux-arm-gnueabihf');
           }
         } catch (e) {
           loadError = e;

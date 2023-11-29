@@ -1,3 +1,3 @@
-# `msc-swc-win32-ia32-msvc`
+# `@msc-studio/swc-win32-ia32-msvc`
 
-This is the **i686-pc-windows-msvc** binary for `msc-swc`
+This is the **i686-pc-windows-msvc** binary for `@msc-studio/swc`

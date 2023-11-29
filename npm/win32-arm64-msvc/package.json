@@ -1,15 +1,15 @@
 {
-  "name": "msc-swc-win32-arm64-msvc",
-  "version": "0.0.1",
+  "name": "@msc-studio/swc-win32-arm64-msvc",
+  "version": "0.1.0",
   "os": [
     "win32"
   ],
   "cpu": [
     "arm64"
   ],
-  "main": "msc-swc.win32-arm64-msvc.node",
+  "main": "swc.win32-arm64-msvc.node",
   "files": [
-    "msc-swc.win32-arm64-msvc.node"
+    "swc.win32-arm64-msvc.node"
   ],
   "description": "msc swc package with napi-rs",
   "keywords": [

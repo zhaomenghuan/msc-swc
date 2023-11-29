@@ -1,15 +1,15 @@
 {
-  "name": "msc-swc-darwin-arm64",
-  "version": "0.0.1",
+  "name": "@msc-studio/swc-darwin-arm64",
+  "version": "0.1.0",
   "os": [
     "darwin"
   ],
   "cpu": [
     "arm64"
   ],
-  "main": "msc-swc.darwin-arm64.node",
+  "main": "swc.darwin-arm64.node",
   "files": [
-    "msc-swc.darwin-arm64.node"
+    "swc.darwin-arm64.node"
   ],
   "description": "msc swc package with napi-rs",
   "keywords": [

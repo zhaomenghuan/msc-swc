@@ -1,39 +1,44 @@
 #![deny(clippy::all)]
 
 mod utils;
+mod module_resolver;
 
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Arc;
-use anyhow::Context as _;
 use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
+use serde::Serialize;
 use swc_core::{
-  base::{config::Options, TransformOutput, Compiler},
+  base::{config::Options, Compiler},
   common::{FilePathMapping, SourceMap, FileName, comments::SingleThreadedComments},
-  ecma::{ast::{Program, Module, Script}, visit::Fold},
-  node::{deserialize_json, get_deserialized, MapErr}
+  ecma::{
+    visit::as_folder,
+    transforms::base::pass::noop
+  },
+  node::{get_deserialized, MapErr}
 };
+
+use crate::module_resolver::ModuleResolverVisit;
 use crate::utils::{init_default_trace_subscriber, try_with};
 
-pub fn noop() -> impl Fold {
-  Noop
+#[napi_derive::napi(object)]
+#[derive(Debug, Serialize)]
+pub struct Metadata {
+  pub requires: Vec<String>,
 }
 
-struct Noop;
-impl Fold for Noop {
-  #[inline(always)]
-  fn fold_module(&mut self, m: Module) -> Module {
-      m
-  }
-
-  #[inline(always)]
-  fn fold_script(&mut self, s: Script) -> Script {
-      s
-  }
+#[napi_derive::napi(object)]
+#[derive(Debug, Serialize)]
+pub struct SwcTransformOutput {
+  pub code: String,
+  #[serde(skip_serializing_if = "Option::is_none")]
+  pub map: Option<String>,
+  pub metadata: Metadata,
 }
 
 #[napi]
-pub fn swc_transform_sync(s: String, is_module: bool, opts: Buffer) -> napi::Result<TransformOutput> {
+pub fn swc_transform_sync(s: String, opts: Buffer) -> napi::Result<SwcTransformOutput> {
   init_default_trace_subscriber();
 
   let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
@@ -53,36 +58,36 @@ pub fn swc_transform_sync(s: String, is_module: bool, opts: Buffer) -> napi::Res
     error_format,
     |handler| {
       c.run(|| {
-        if is_module {
-          let program: Program =
-            deserialize_json(s.as_str()).context("failed to deserialize Program")?;
-          c.process_js(handler, program, &options)
+        let filename = if options.filename.is_empty() {
+          FileName::Anon
         } else {
-          let fm = c.cm.new_source_file(
-            if options.filename.is_empty() {
-              FileName::Anon
-            } else {
-              FileName::Real(options.filename.clone().into())
-            },
-            s,
-          );
+          FileName::Real(options.filename.clone().into())
+        };
+        let fm = c.cm.new_source_file(filename.clone(), s);
 
-          c.process_js_with_custom_pass(
-            fm,
-            None,
-            handler,
-            &options,
-            SingleThreadedComments::default(),
-            |_| {
-              dbg!("custom_before_pass");
-              noop()
-            },
-            |_| {
-              dbg!("custom_after_pass");
-              noop()
-            }
-          )
-        }
+        let mut requires: HashSet<String> = HashSet::new();
+        let result = c.process_js_with_custom_pass(
+          fm,
+          None,
+          handler,
+          &options,
+          SingleThreadedComments::default(),
+          |_| as_folder(ModuleResolverVisit {
+            cwd: options.cwd.clone(),
+            filename: filename.clone(),
+            requires: &mut requires
+          }),
+          |_| noop(),
+        ).unwrap();
+
+        let metadata = Metadata {
+          requires: requires.clone().into_iter().collect()
+        };
+        Ok(SwcTransformOutput {
+          code: result.code,
+          map: result.map.clone(),
+          metadata,
+        })
       })
     },
   )

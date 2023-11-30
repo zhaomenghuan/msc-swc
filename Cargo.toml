@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = { version = "1.0.66", features = [] }
+serde = { version = "1.0.193", features = ["derive"] }
 napi = { version = "2", default-features = false, features = [
   "napi3",
   "serde-json",
@@ -31,7 +32,6 @@ swc_core = { version = "0.86.81", features = [
   "base_node",
   "base_concurrent",
 ] }
-swc_malloc = "0.5.10"
 tracing = { version = "0.1.37", features = ["release_max_level_info"] }
 tracing-futures = "0.2.5"
 tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }

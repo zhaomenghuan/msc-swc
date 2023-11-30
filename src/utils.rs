@@ -1,4 +1,5 @@
 use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::path::{Component, PathBuf};
 use anyhow::{anyhow, Error};
 use swc_core::{
     base::{config::ErrorFormat, try_with_handler},
@@ -59,4 +60,35 @@ pub fn try_with<F, Ret>(
             },
         )
     })
+}
+
+///
+/// 解析路径
+/// 参考：https://github.com/effector/swc-plugin/blob/main/src/path.rs#L3
+///
+pub fn normalize_path(path: PathBuf) -> PathBuf {
+    let mut components = path.components().peekable();
+    let mut result = if let Some(c @ Component::Prefix(..)) = components.peek().cloned() {
+        components.next();
+        PathBuf::from(c.as_os_str())
+    } else {
+        PathBuf::new()
+    };
+
+    for component in components {
+        match component {
+            Component::Prefix(..) => unreachable!(),
+            Component::RootDir => {
+                result.push(component.as_os_str());
+            }
+            Component::CurDir => {}
+            Component::ParentDir => {
+                result.pop();
+            }
+            Component::Normal(c) => {
+                result.push(c);
+            }
+        }
+    }
+    return result;
 }

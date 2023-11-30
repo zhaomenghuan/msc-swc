@@ -8,4 +8,12 @@ export interface TransformOutput {
   code: string;
   map?: string;
 }
-export function swcTransformSync(s: string, isModule: boolean, opts: Buffer): TransformOutput;
+export interface Metadata {
+  requires: Array<string>;
+}
+export interface SwcTransformOutput {
+  code: string;
+  map?: string;
+  metadata: Metadata;
+}
+export function swcTransformSync(s: string, opts: Buffer): SwcTransformOutput;

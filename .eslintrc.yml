@@ -53,15 +53,7 @@ rules:
   'import/no-duplicates': 2
   'import/first': 2
   'import/newline-after-import': 2
-  'import/order':
-    [
-      2,
-      {
-        'newlines-between': 'always',
-        'alphabetize': { 'order': 'asc' },
-        'groups': ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-      },
-    ]
+  'import/order': 0
 
 overrides:
   - files:

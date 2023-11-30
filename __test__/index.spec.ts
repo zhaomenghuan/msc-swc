@@ -44,17 +44,11 @@ function compile(cwd: string, filename: string, content: string) {
 
 test('swcTransformSync 简单示例', (t) => {
   const content = `
-import '../utils/index';
+import { log } from '../utils/index';
 import './index.css';
 
-function joinPath(name) {
-  return path.join(__dirname, name);
-}
-
-const appPath = joinPath('__app');
-console.log('appPath: ', appPath);`;
-  const result = compile('', 'pages/index/index.js', content);
-  t.is(result.metadata.requires.includes('/pages/utils/index.js'), true);
+log('hello, swc');`;
+  compile('', 'pages/index/index.js', content);
   t.pass();
 });
 

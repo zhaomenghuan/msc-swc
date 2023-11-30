@@ -81,7 +81,7 @@ fn process_transform(node_span: Span, cwd: PathBuf, filename: FileName, required
             // 替换为 js 扩展名
             required_file_full_path = replace_to_js_extension(&required_file_full_path);
             // 替换引用文件的路径
-            transformed_path = Some(required_file_full_path.to_str().unwrap().replace(&cwd.as_str(), ""));
+            transformed_path = Some(required_file_full_path.to_str().unwrap().replace(&cwd.as_str(), "").replace("\\", "/"));
         } else {
             absolute_path = None;
             transformed_path = None;
@@ -100,7 +100,7 @@ fn process_transform(node_span: Span, cwd: PathBuf, filename: FileName, required
         // 替换为 js 扩展名
         required_file_full_path = replace_to_js_extension(&required_file_full_path);
         // 替换引用文件的路径
-        transformed_path = Some(required_file_full_path.to_str().unwrap().to_string());
+        transformed_path = Some(required_file_full_path.to_str().unwrap().replace("\\", "/"));
     }
     TransformResult {
         absolute_path,

@@ -9,6 +9,9 @@ export interface TransformOutput {
   map?: string;
 }
 export function minifySync(code: Buffer, opts: Buffer): TransformOutput;
+export interface TransformerCustomOptions {
+  externalPackages: Array<string>;
+}
 export interface Metadata {
   requires: Array<string>;
 }
@@ -17,4 +20,4 @@ export interface SwcTransformOutput {
   map?: string;
   metadata: Metadata;
 }
-export function swcTransformSync(s: string, opts: Buffer): SwcTransformOutput;
+export function swcTransformSync(s: string, opts: Buffer, customOpts?: Buffer | undefined | null): SwcTransformOutput;

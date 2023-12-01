@@ -8,7 +8,7 @@ Page({
   onLoad() {
     log('Page onLoad, env: ', config.env);
     this.setState({
-      env: config.env
+      env: config.env,
     });
-  }
+  },
 });

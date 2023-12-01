@@ -1,8 +1,8 @@
 [package]
-name = "msc_swc"
-version = "0.1.0"
 authors = ["zhaomenghuan <zhaomenghuan@foxmail.com>"]
 edition = "2021"
+name    = "msc_swc"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,7 +11,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = { version = "1.0.66", features = [] }
-serde = { version = "1.0.193", features = ["derive"] }
 napi = { version = "2", default-features = false, features = [
   "napi3",
   "serde-json",
@@ -19,6 +18,7 @@ napi = { version = "2", default-features = false, features = [
 napi-derive = { version = "2", default-features = false, features = [
   "type-def",
 ] }
+serde = { version = "1.0.193", features = ["derive"] }
 swc_core = { version = "0.86.81", features = [
   "allocator_node",
   "ecma_ast",

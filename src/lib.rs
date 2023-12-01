@@ -1,22 +1,19 @@
 #![deny(clippy::all)]
 
-mod utils;
 mod module_resolver;
+mod utils;
 
-use std::collections::HashSet;
-use std::path::Path;
-use std::sync::Arc;
 use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
 use serde::Serialize;
+use std::collections::HashSet;
+use std::path::Path;
+use std::sync::Arc;
 use swc_core::{
   base::{config::Options, Compiler},
-  common::{FilePathMapping, SourceMap, FileName, comments::SingleThreadedComments},
-  ecma::{
-    visit::as_folder,
-    transforms::base::pass::noop
-  },
-  node::{get_deserialized, MapErr}
+  common::{comments::SingleThreadedComments, FileName, FilePathMapping, SourceMap},
+  ecma::{transforms::base::pass::noop, visit::as_folder},
+  node::{get_deserialized, MapErr},
 };
 
 use crate::module_resolver::ModuleResolverVisit;
@@ -66,22 +63,26 @@ pub fn swc_transform_sync(s: String, opts: Buffer) -> napi::Result<SwcTransformO
         let fm = c.cm.new_source_file(filename.clone(), s);
 
         let mut requires: HashSet<String> = HashSet::new();
-        let result = c.process_js_with_custom_pass(
-          fm,
-          None,
-          handler,
-          &options,
-          SingleThreadedComments::default(),
-          |_| as_folder(ModuleResolverVisit {
-            cwd: options.cwd.clone(),
-            filename: filename.clone(),
-            requires: &mut requires
-          }),
-          |_| noop(),
-        ).unwrap();
+        let result = c
+          .process_js_with_custom_pass(
+            fm,
+            None,
+            handler,
+            &options,
+            SingleThreadedComments::default(),
+            |_| {
+              as_folder(ModuleResolverVisit {
+                cwd: options.cwd.clone(),
+                filename: filename.clone(),
+                requires: &mut requires,
+              })
+            },
+            |_| noop(),
+          )
+          .unwrap();
 
         let metadata = Metadata {
-          requires: requires.clone().into_iter().collect()
+          requires: requires.clone().into_iter().collect(),
         };
         Ok(SwcTransformOutput {
           code: result.code,

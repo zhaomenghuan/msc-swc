@@ -8,6 +8,7 @@ export interface TransformOutput {
   code: string;
   map?: string;
 }
+export function minifySync(code: Buffer, opts: Buffer): TransformOutput;
 export interface Metadata {
   requires: Array<string>;
 }

@@ -86,5 +86,5 @@ pub fn normalize_path(path: PathBuf) -> PathBuf {
       }
     }
   }
-  return result;
+  result
 }

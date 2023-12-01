@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import test from 'ava';
 import glob from 'fast-glob';
-import { swcTransformSync } from '../index';
+import { swcTransformSync, minifySync } from '../index';
 
 export function resolveFileType(fileName: string) {
   return path.extname(fileName).substring(1);
@@ -67,18 +67,39 @@ test('swcTransformSync 完整示例', (t) => {
 
 test('swcTransformSync 错误提示示例', (t) => {
   const content = `
-import '../utils/index';
+  import { log } from '../utils/index';
 
-function joinPath(name) {
-  return path.join(__dirname, name);
-}
-
-const appPath = joinPath('__app');
-console.log('appPath: ', appPath);`;
+  log('hello, swc');
+  `;
   try {
     compile(path.join(__dirname), 'pages/index/index.js', content);
   } catch (error) {
     console.error(error);
     t.pass();
   }
+});
+
+test('minifySync 示例', (t) => {
+  const code = `
+    function deadCode() {
+      console.log('dead code');
+    }
+
+    function log(message) {
+      console.info('message: ' + message);
+    }
+
+    log('hello, swc');
+  `;
+  const options = {
+    mangle: {
+      safari10: true,
+    },
+    compress: {
+      pure_funcs: ['console.log'],
+    },
+  };
+  const result = minifySync(toBuffer(code), toBuffer(options));
+  const expected = 'function deadCode(){}function log(o){console.info("message: "+o)}log("hello, swc");';
+  t.is(result.code, expected);
 });

@@ -234,7 +234,8 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`);
 }
 
-const { transformSync, swcTransformSync } = nativeBinding;
+const { transformSync, minifySync, swcTransformSync } = nativeBinding;
 
 module.exports.transformSync = transformSync;
+module.exports.minifySync = minifySync;
 module.exports.swcTransformSync = swcTransformSync;

@@ -1,10 +1,9 @@
 use crate::utils::normalize_path;
 use std::collections::HashSet;
-use std::path::PathBuf;
-use swc_core::common::Span;
+use std::path::{Path, PathBuf};
 use swc_core::{
   atoms::JsWord,
-  common::{errors::HANDLER, sync::Lazy, FileName, DUMMY_SP},
+  common::{errors::HANDLER, sync::Lazy, FileName, Span, DUMMY_SP},
   ecma::{
     ast::{
       CallExpr, Callee, Expr, ExprOrSpread, ImportDecl, Lit, Module, ModuleDecl, ModuleItem, Str,
@@ -60,10 +59,8 @@ fn process_transform(
 
   // 是否是默认扩展名称, 否则默认兜底为 .js 后缀
   if !is_default_extension(&required_file_full_path) {
-    required_file_full_path = PathBuf::from(format!(
-      "{}.js",
-      required_file_full_path.to_str().unwrap().to_string()
-    ));
+    required_file_full_path =
+      PathBuf::from(format!("{}.js", required_file_full_path.to_str().unwrap()));
   }
 
   // 如果 cwd 存在，则判断文件是否存在
@@ -93,8 +90,8 @@ fn process_transform(
         required_file_full_path
           .to_str()
           .unwrap()
-          .replace(&cwd.as_str(), "")
-          .replace("\\", "/"),
+          .replace(cwd.as_str(), "")
+          .replace('\\', "/"),
       );
     } else {
       absolute_path = None;
@@ -114,7 +111,7 @@ fn process_transform(
     // 替换为 js 扩展名
     required_file_full_path = replace_to_js_extension(&required_file_full_path);
     // 替换引用文件的路径
-    transformed_path = Some(required_file_full_path.to_str().unwrap().replace("\\", "/"));
+    transformed_path = Some(required_file_full_path.to_str().unwrap().replace('\\', "/"));
   }
   TransformResult {
     absolute_path,
@@ -205,19 +202,19 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
 ///
 /// 判断文件扩展名是否是默认支持的扩展名
 ///
-fn is_default_extension(path: &PathBuf) -> bool {
+fn is_default_extension(path: &Path) -> bool {
   if let Some(ext) = path.extension() {
     return DEFAULT_EXTENSIONS.contains(&ext.to_str().unwrap());
   }
 
-  return false;
+  false
 }
 
 ///
 /// 替换为 js 扩展名
 ///
-fn replace_to_js_extension(path: &PathBuf) -> PathBuf {
-  let mut p = path.clone();
+fn replace_to_js_extension(path: &Path) -> PathBuf {
+  let mut p = path.to_path_buf();
   let required_file_ext = p.extension().and_then(|s| s.to_str());
   if required_file_ext == Some("ts")
     || required_file_ext == Some("jsx")
@@ -225,14 +222,14 @@ fn replace_to_js_extension(path: &PathBuf) -> PathBuf {
   {
     p.set_extension("js");
   }
-  return p;
+  p
 }
 
 ///
 /// 判断是否是样式文件
 ///
 fn is_style(source: &JsWord) -> bool {
-  return source.ends_with(".css") || source.ends_with(".scss") || source.ends_with(".sass");
+  source.ends_with(".css") || source.ends_with(".scss") || source.ends_with(".sass")
 }
 
 ///
@@ -253,5 +250,5 @@ pub fn resolve_required_file_path(
   let required_file_full_path = PathBuf::from(cwd)
     .join(PathBuf::from(source_file_path))
     .with_file_name(required_file_path);
-  return normalize_path(required_file_full_path);
+  normalize_path(required_file_full_path)
 }

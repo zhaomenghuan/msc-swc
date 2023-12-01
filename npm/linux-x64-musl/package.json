@@ -7,6 +7,9 @@
   "cpu": [
     "x64"
   ],
+  "libc": [
+    "musl"
+  ],
   "main": "swc.linux-x64-musl.node",
   "files": [
     "swc.linux-x64-musl.node"
@@ -28,8 +31,5 @@
     "registry": "https://registry.npmjs.org/",
     "access": "public"
   },
-  "repository": "https://github.com/zhaomenghuan/msc-swc.git",
-  "libc": [
-    "musl"
-  ]
+  "repository": "https://github.com/zhaomenghuan/msc-swc.git"
 }

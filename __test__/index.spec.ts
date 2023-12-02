@@ -16,7 +16,7 @@ function compile(cwd: string, filename: string, content: string) {
   const fileType = resolveFileType(filename);
   const enableTypescript = fileType === 'ts' || fileType === 'tsx';
   const enableJSX = fileType === 'jsx' || fileType === 'tsx';
-  const opts = toBuffer({
+  const options = toBuffer({
     cwd,
     filename,
     sourceMaps: false,
@@ -33,14 +33,36 @@ function compile(cwd: string, filename: string, content: string) {
       strictMode: true,
     },
   });
+  const customOptions = toBuffer({
+    externalPackages: ['react'],
+  });
   console.info('-----------------------------');
-  const result = swcTransformSync(content, opts);
+  const result = swcTransformSync(content, options, customOptions);
   console.info('filename: ', filename);
   console.info('code: \n', result.code);
   console.info('metadata:', result.metadata);
   console.info('-----------------------------');
   return result;
 }
+
+test('swcTransformSync Node.js 内置模块及外部依赖的示例', (t) => {
+  const content = `
+import path from 'path';
+import { copyFile } from 'fs/promises';
+import { writeFile } from 'node:fs/promises';
+import React from 'react';
+
+const newPath = path.join(__dirname, 'pages');
+console.log(newPath);
+  `;
+  const { code } = compile('', 'pages/index/index.js', content);
+  const actual =
+    code.includes('require("path")') &&
+    code.includes('require("fs/promises")') &&
+    code.includes('require("node:fs/promises")') &&
+    code.includes('require("react")');
+  t.assert(actual);
+});
 
 test('swcTransformSync 简单示例', (t) => {
   const content = `

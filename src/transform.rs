@@ -1,5 +1,5 @@
 use napi::bindgen_prelude::Buffer;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Arc;
@@ -12,6 +12,14 @@ use swc_core::{
 
 use crate::module_resolver::ModuleResolverVisit;
 use crate::utils::{init_default_trace_subscriber, try_with};
+
+#[napi_derive::napi(object)]
+#[derive(Debug, Clone, Default, Deserialize)]
+#[serde(deny_unknown_fields, rename_all = "camelCase")]
+pub struct TransformerCustomOptions {
+  #[serde(default)]
+  pub external_packages: Vec<String>,
+}
 
 #[napi_derive::napi(object)]
 #[derive(Debug, Serialize)]
@@ -29,13 +37,22 @@ pub struct SwcTransformOutput {
 }
 
 #[napi]
-pub fn swc_transform_sync(s: String, opts: Buffer) -> napi::Result<SwcTransformOutput> {
+pub fn swc_transform_sync(
+  s: String,
+  opts: Buffer,
+  custom_opts: Option<Buffer>,
+) -> napi::Result<SwcTransformOutput> {
   init_default_trace_subscriber();
 
   let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
   let c = Compiler::new(cm.clone());
 
   let mut options: Options = get_deserialized(&opts)?;
+  let custom_options: TransformerCustomOptions = if custom_opts.is_some() {
+    get_deserialized(&custom_opts.unwrap())?
+  } else {
+    TransformerCustomOptions::default()
+  };
 
   if !options.filename.is_empty() {
     options.config.adjust(Path::new(&options.filename));
@@ -68,6 +85,7 @@ pub fn swc_transform_sync(s: String, opts: Buffer) -> napi::Result<SwcTransformO
               as_folder(ModuleResolverVisit {
                 cwd: options.cwd.clone(),
                 filename: filename.clone(),
+                external_packages: custom_options.external_packages.clone(),
                 requires: &mut requires,
               })
             },

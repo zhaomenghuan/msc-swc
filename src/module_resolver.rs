@@ -15,13 +15,6 @@ use swc_core::{
 static DEFAULT_EXTENSIONS: Lazy<Vec<&'static str>> =
   Lazy::new(|| vec!["js", "ts", "jsx", "tsx", "json"]);
 
-static EXTERNALS_PACKAGE: Lazy<HashSet<String>> = Lazy::new(|| {
-  let mut set = HashSet::new();
-  set.insert("react".to_string());
-  set.insert("@mtfe/msc-rlist".to_string());
-  set
-});
-
 pub struct TransformResult {
   pub absolute_path: Option<String>,
   pub transformed_path: Option<String>,
@@ -32,9 +25,10 @@ fn process_transform(
   cwd: PathBuf,
   filename: FileName,
   required_file_path: String,
+  external_packages: Vec<String>,
 ) -> TransformResult {
-  // 内置的依赖 react、@mtfe/msc-rlist 由基础库解析
-  if EXTERNALS_PACKAGE.contains(&*required_file_path) {
+  // Node 内置模块 & 外部依赖
+  if is_builtin_module(&required_file_path) || external_packages.contains(&required_file_path) {
     return TransformResult {
       absolute_path: None,
       transformed_path: None,
@@ -124,6 +118,7 @@ pub struct ModuleResolverVisit<'a> {
   pub cwd: PathBuf,
   // 文件名称
   pub filename: FileName,
+  pub external_packages: Vec<String>,
   // 引用文件
   pub requires: &'a mut HashSet<String>,
 }
@@ -143,6 +138,7 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
               self.cwd.clone(),
               self.filename.clone(),
               required_file_path,
+              self.external_packages.clone(),
             );
             if result.absolute_path.is_some() {
               self.requires.insert(result.absolute_path.unwrap());
@@ -177,6 +173,7 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
       self.cwd.clone(),
       self.filename.clone(),
       required_file_path,
+      self.external_packages.clone(),
     );
     if result.absolute_path.is_some() {
       self.requires.insert(result.absolute_path.unwrap());
@@ -230,6 +227,48 @@ fn replace_to_js_extension(path: &Path) -> PathBuf {
 ///
 fn is_style(source: &JsWord) -> bool {
   source.ends_with(".css") || source.ends_with(".scss") || source.ends_with(".sass")
+}
+
+///
+/// 判断是否是 Node.js 内置的 API
+///
+fn is_builtin_module(module: &str) -> bool {
+  let builtin_modules = vec![
+    "assert",
+    "buffer",
+    "child_process",
+    "cluster",
+    "console",
+    "constants",
+    "crypto",
+    "dgram",
+    "dns",
+    "domain",
+    "events",
+    "fs",
+    "http",
+    "https",
+    "net",
+    "os",
+    "path",
+    "punycode",
+    "querystring",
+    "readline",
+    "repl",
+    "stream",
+    "string_decoder",
+    "timers",
+    "tls",
+    "tty",
+    "url",
+    "util",
+    "v8",
+    "vm",
+    "zlib",
+  ];
+  let module = module.strip_prefix("node:").unwrap_or(module);
+  let module = module.split('/').next().unwrap();
+  builtin_modules.contains(&module)
 }
 
 ///

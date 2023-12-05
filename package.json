@@ -24,6 +24,7 @@
       "additional": [
         "x86_64-unknown-linux-musl",
         "i686-pc-windows-msvc",
+        "aarch64-unknown-linux-gnu",
         "aarch64-apple-darwin",
         "aarch64-unknown-linux-musl",
         "aarch64-pc-windows-msvc"
@@ -101,5 +102,6 @@
     "trailingComma": "all",
     "singleQuote": true,
     "arrowParens": "always"
-  }
+  },
+  "packageManager": "yarn@4.0.2"
 }

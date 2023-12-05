@@ -1,5 +1,5 @@
 {
-  "name": "@msc-studio/swc-linux-arm64-musl",
+  "name": "@msc-studio/swc-linux-arm64-gnu",
   "version": "0.3.0",
   "os": [
     "linux"
@@ -8,11 +8,11 @@
     "arm64"
   ],
   "libc": [
-    "musl"
+    "glibc"
   ],
-  "main": "swc.linux-arm64-musl.node",
+  "main": "swc.linux-arm64-gnu.node",
   "files": [
-    "swc.linux-arm64-musl.node"
+    "swc.linux-arm64-gnu.node"
   ],
   "description": "msc swc package with napi-rs",
   "keywords": [

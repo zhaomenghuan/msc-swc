@@ -5,7 +5,7 @@ extern crate napi_derive;
 
 extern crate swc_malloc;
 
-mod minify;
-mod module_resolver;
-mod transform;
-mod utils;
+pub mod minify;
+pub mod module_resolver;
+pub mod transform;
+pub mod utils;

@@ -29,7 +29,7 @@ pub struct Metadata {
 
 #[napi_derive::napi(object)]
 #[derive(Debug, Serialize)]
-pub struct SwcTransformOutput {
+pub struct TransformOutput {
   pub code: String,
   #[serde(skip_serializing_if = "Option::is_none")]
   pub map: Option<String>,
@@ -37,11 +37,11 @@ pub struct SwcTransformOutput {
 }
 
 #[napi]
-pub fn swc_transform_sync(
+pub fn transform_sync(
   s: String,
   opts: Buffer,
   custom_opts: Option<Buffer>,
-) -> napi::Result<SwcTransformOutput> {
+) -> napi::Result<TransformOutput> {
   init_default_trace_subscriber();
 
   let cm = Arc::new(SourceMap::new(FilePathMapping::empty()));
@@ -96,7 +96,7 @@ pub fn swc_transform_sync(
         let metadata = Metadata {
           requires: requires.clone().into_iter().collect(),
         };
-        Ok(SwcTransformOutput {
+        Ok(TransformOutput {
           code: result.code,
           map: result.map.clone(),
           metadata,

@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import test from 'ava';
 import glob from 'fast-glob';
-import { swcTransformSync, minifySync } from '../index';
+import { transformSync, minifySync } from '../index';
 
 export function resolveFileType(fileName: string) {
   return path.extname(fileName).substring(1);
@@ -37,7 +37,7 @@ function compile(cwd: string, filename: string, content: string) {
     externalPackages: ['react'],
   });
   console.info('-----------------------------');
-  const result = swcTransformSync(content, options, customOptions);
+  const result = transformSync(content, options, customOptions);
   console.info('filename: ', filename);
   console.info('code: \n', result.code);
   console.info('metadata:', result.metadata);
@@ -45,7 +45,7 @@ function compile(cwd: string, filename: string, content: string) {
   return result;
 }
 
-test('swcTransformSync Node.js 内置模块及外部依赖的示例', (t) => {
+test('transformSync Node.js 内置模块及外部依赖的示例', (t) => {
   const content = `
 import path from 'path';
 import { copyFile } from 'fs/promises';
@@ -64,7 +64,7 @@ console.log(newPath);
   t.assert(actual);
 });
 
-test('swcTransformSync 简单示例', (t) => {
+test('transformSync 简单示例', (t) => {
   const content = `
 import { log } from '../utils/index';
 import './index.css';
@@ -74,7 +74,7 @@ log('hello, swc');`;
   t.pass();
 });
 
-test('swcTransformSync 完整示例', (t) => {
+test('transformSync 完整示例', (t) => {
   const TEST_PROJECT_ROOT_PATH = path.join(__dirname, 'app');
   const files = glob.sync('**/*.+(js|jsx|ts|tsx)', {
     cwd: TEST_PROJECT_ROOT_PATH,
@@ -87,7 +87,7 @@ test('swcTransformSync 完整示例', (t) => {
   t.pass();
 });
 
-test('swcTransformSync 错误提示示例', (t) => {
+test('transformSync 错误提示示例', (t) => {
   const content = `
   import { log } from '../utils/index';
 
@@ -99,6 +99,15 @@ test('swcTransformSync 错误提示示例', (t) => {
     console.error(error);
     t.pass();
   }
+});
+
+test('transformSync require 模块并立即调用模块方法', (t) => {
+  const content = `
+    require('./utils/util').formatTime(new Date());
+  `;
+
+  compile('', 'pages/index/index.js', content);
+  t.pass();
 });
 
 test('minifySync 示例', (t) => {

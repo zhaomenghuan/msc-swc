@@ -118,6 +118,7 @@ pub struct ModuleResolverVisit<'a> {
   pub cwd: PathBuf,
   // 文件名称
   pub filename: FileName,
+  // 外部 NPM 包
   pub external_packages: Vec<String>,
   // 引用文件
   pub requires: &'a mut HashSet<String>,
@@ -128,6 +129,7 @@ pub struct ModuleResolverVisit<'a> {
 // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
 impl<'a> VisitMut for ModuleResolverVisit<'a> {
   fn visit_mut_call_expr(&mut self, n: &mut CallExpr) {
+    n.visit_mut_children_with(self);
     if let Callee::Expr(e) = &n.callee {
       if let Expr::Ident(i) = &**e {
         if i.sym == *"require" && n.args.len() == 1 {

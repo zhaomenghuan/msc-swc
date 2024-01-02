@@ -28,7 +28,8 @@ pub struct TransformResult {
 /// ./utils 解析优先级: ./utils.js -> ./utils.ts -> ... -> ./utils/index.js -> ./utils/index.ts -> ...
 /// ./utils.wx 解析优先级: ./utils.wx.js -> ./utils.wx.ts -> ... -> ./utils.wx/index.js -> ./utils.wx/index.ts -> ...
 ///
-fn resolve_file_path(mut file_path: PathBuf) -> Option<PathBuf> {
+fn resolve_file_path(file_path: PathBuf) -> Option<PathBuf> {
+  let file_path_string = file_path.to_str().unwrap();
   let mut file_absolute_path: Option<PathBuf> = None;
   // 处理默认扩展名且文件存在
   if is_default_extension(&file_path) && file_path.exists() {
@@ -37,9 +38,9 @@ fn resolve_file_path(mut file_path: PathBuf) -> Option<PathBuf> {
 
   // 处理缺省扩展名且文件存在的情况
   for extension in DEFAULT_EXTENSIONS.iter() {
-    let file_path = PathBuf::from(format!("{}.{}", file_path.to_str().unwrap(), extension));
-    if file_path.exists() {
-      file_absolute_path = Some(file_path.clone());
+    let new_file_path = PathBuf::from(format!("{}.{}", file_path_string, extension));
+    if new_file_path.exists() {
+      file_absolute_path = Some(new_file_path.clone());
       break;
     }
   }
@@ -50,13 +51,9 @@ fn resolve_file_path(mut file_path: PathBuf) -> Option<PathBuf> {
 
   // 处理缺省扩展名且文件夹下 index.{js|ts|...} 文件存在的情况
   for extension in DEFAULT_EXTENSIONS.iter() {
-    file_path = PathBuf::from(format!(
-      "{}/index.{}",
-      file_path.to_str().unwrap(),
-      extension
-    ));
-    if file_path.exists() {
-      file_absolute_path = Some(file_path.clone());
+    let new_file_path = PathBuf::from(format!("{}/index.{}", file_path_string, extension));
+    if new_file_path.exists() {
+      file_absolute_path = Some(new_file_path.clone());
       break;
     }
   }
@@ -263,7 +260,7 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
       n.span,
       self.cwd.clone(),
       self.filename.clone(),
-      required_file_path,
+      required_file_path.clone(),
       self.external_packages.clone(),
     );
     if result.absolute_path.is_some() {
@@ -374,7 +371,7 @@ pub fn resolve_required_file_path(
   required_file_path: String,
 ) -> PathBuf {
   if required_file_path.starts_with('/') {
-    return PathBuf::from(required_file_path);
+    return PathBuf::from(cwd).join(required_file_path.trim_start_matches('/'));
   }
 
   let required_file_full_path = PathBuf::from(cwd)

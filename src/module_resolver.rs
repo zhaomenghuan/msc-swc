@@ -20,6 +20,76 @@ pub struct TransformResult {
   pub transformed_path: Option<String>,
 }
 
+///
+/// 判断默认扩展名的文件是否存在
+/// eg:
+/// ./utils 解析优先级: ./utils.js -> ./utils.ts -> ... -> ./utils/index.js -> ./utils/index.ts -> ...
+/// ./utils.wx 解析优先级: ./utils.wx.js -> ./utils.wx.ts -> ... -> ./utils.wx/index.js -> ./utils.wx/index.ts -> ...
+///
+fn resolve_file_path(mut file_path: PathBuf) -> Option<PathBuf> {
+  let mut file_absolute_path: Option<PathBuf> = None;
+  // 处理默认扩展名且文件存在
+  if is_default_extension(&file_path) && file_path.exists() {
+    return Some(file_path);
+  }
+
+  // 处理缺省扩展名且文件存在的情况
+  for extension in DEFAULT_EXTENSIONS.iter() {
+    let file_path = PathBuf::from(format!("{}.{}", file_path.to_str().unwrap(), extension));
+    if file_path.exists() {
+      file_absolute_path = Some(file_path.clone());
+      break;
+    }
+  }
+
+  if file_absolute_path.is_some() {
+    return file_absolute_path;
+  }
+
+  // 处理缺省扩展名且文件夹下 index.{js|ts|...} 文件存在的情况
+  for extension in DEFAULT_EXTENSIONS.iter() {
+    file_path = PathBuf::from(format!(
+      "{}/index.{}",
+      file_path.to_str().unwrap(),
+      extension
+    ));
+    if file_path.exists() {
+      file_absolute_path = Some(file_path.clone());
+      break;
+    }
+  }
+
+  file_absolute_path
+}
+
+///
+/// 处理 npm 包
+///
+fn resolve_node_modules_file(
+  cwd: String,
+  source_file_path: String,
+  required_file_path: String,
+) -> Option<PathBuf> {
+  let mut file_absolute_path: Option<PathBuf> = None;
+  let source_file_absolute_path = PathBuf::from(cwd.clone()).join(PathBuf::from(source_file_path));
+
+  let mut parent_path = source_file_absolute_path.parent();
+  while let Some(path) = parent_path {
+    if !path.starts_with(&cwd.clone()) {
+      break;
+    }
+    let package_file_path = path.join("node_modules").join(&required_file_path);
+    let resolved_file_path = resolve_file_path(package_file_path);
+    if resolved_file_path.is_some() {
+      file_absolute_path = resolved_file_path.clone();
+      break;
+    }
+    parent_path = path.parent();
+  }
+
+  file_absolute_path
+}
+
 fn process_transform(
   node_span: Span,
   cwd: PathBuf,
@@ -51,53 +121,45 @@ fn process_transform(
     required_file_path.clone(),
   );
 
-  // 是否是默认扩展名称, 否则默认兜底为 .js 后缀
-  if !is_default_extension(&required_file_full_path) {
-    required_file_full_path =
-      PathBuf::from(format!("{}.js", required_file_full_path.to_str().unwrap()));
-  }
-
   // 如果 cwd 存在，则判断文件是否存在
   if is_cwd_exists {
-    let mut is_exists: bool = false;
-    // 判断默认扩展名的文件是否存在
-    for extension in DEFAULT_EXTENSIONS.iter() {
-      let mut path = required_file_full_path.clone();
-      if path.extension().and_then(|s| s.to_str()) != Some(extension) {
-        path.set_extension(extension);
-      }
-      is_exists = path.exists();
-      if is_exists {
-        required_file_full_path = path.clone();
-        break;
-      }
-    }
-
-    // TODO: 文件不存在时判断 npm 包是否存在
-    if is_exists {
-      // 保存引用文件的绝对路径
-      absolute_path = Some(required_file_full_path.to_str().unwrap().to_string());
-      // 替换为 js 扩展名
-      required_file_full_path = replace_to_js_extension(&required_file_full_path);
-      // 替换引用文件的路径
-      transformed_path = Some(
-        required_file_full_path
-          .to_str()
-          .unwrap()
-          .replace(cwd.as_str(), "")
-          .replace('\\', "/"),
-      );
-    } else {
-      absolute_path = None;
-      transformed_path = None;
-      HANDLER.with(|handler| {
-        handler
-          .struct_span_err(
-            node_span,
-            format!("{filename} 文件中引入的 {required_file_path} 文件不存在").as_str(),
-          )
-          .emit();
+    // 处理文件扩展名或 index 简写的模式
+    let required_file_full_path =
+      resolve_file_path(required_file_full_path.clone()).or_else(|| {
+        resolve_node_modules_file(
+          cwd.clone(),
+          filename.to_string(),
+          required_file_path.clone(),
+        )
       });
+
+    match required_file_full_path {
+      Some(mut path) => {
+        // 保存引用文件的绝对路径
+        absolute_path = Some(path.to_str().unwrap().to_string());
+        // 替换为 js 扩展名
+        path = replace_to_js_extension(&path);
+        // 替换引用文件的路径
+        transformed_path = Some(
+          path
+            .to_str()
+            .unwrap()
+            .replace(cwd.as_str(), "")
+            .replace('\\', "/"),
+        );
+      }
+      None => {
+        absolute_path = None;
+        transformed_path = None;
+        HANDLER.with(|handler| {
+          handler
+            .struct_span_err(
+              node_span,
+              format!("{filename} 文件中引入的 {required_file_path} 文件不存在").as_str(),
+            )
+            .emit();
+        });
+      }
     }
   } else {
     // 保存引用文件的绝对路径

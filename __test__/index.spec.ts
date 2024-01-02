@@ -1,49 +1,7 @@
 import path from 'path';
-import fs from 'fs';
 import test from 'ava';
-import glob from 'fast-glob';
-import { transformSync, minifySync } from '../index';
-
-export function resolveFileType(fileName: string) {
-  return path.extname(fileName).substring(1);
-}
-
-function toBuffer(t: unknown): Buffer {
-  return Buffer.from(JSON.stringify(t));
-}
-
-function compile(cwd: string, filename: string, content: string) {
-  const fileType = resolveFileType(filename);
-  const enableTypescript = fileType === 'ts' || fileType === 'tsx';
-  const enableJSX = fileType === 'jsx' || fileType === 'tsx';
-  const options = toBuffer({
-    cwd,
-    filename,
-    sourceMaps: false,
-    isModule: true,
-    jsc: {
-      parser: {
-        syntax: enableTypescript ? 'typescript' : 'ecmascript',
-        jsx: enableJSX,
-      },
-      transform: {},
-    },
-    module: {
-      type: 'commonjs',
-      strictMode: true,
-    },
-  });
-  const customOptions = toBuffer({
-    externalPackages: ['react'],
-  });
-  console.info('-----------------------------');
-  const result = transformSync(content, options, customOptions);
-  console.info('filename: ', filename);
-  console.info('code: \n', result.code);
-  console.info('metadata:', result.metadata);
-  console.info('-----------------------------');
-  return result;
-}
+import { minifySync } from '../index';
+import { compile, toBuffer } from '../test-utils';
 
 test('transformSync Node.js 内置模块及外部依赖的示例', (t) => {
   const content = `
@@ -71,19 +29,6 @@ import './index.css';
 
 log('hello, swc');`;
   compile('', 'pages/index/index.js', content);
-  t.pass();
-});
-
-test('transformSync 完整示例', (t) => {
-  const TEST_PROJECT_ROOT_PATH = path.join(__dirname, 'app');
-  const files = glob.sync('**/*.+(js|jsx|ts|tsx)', {
-    cwd: TEST_PROJECT_ROOT_PATH,
-    onlyFiles: true,
-  });
-  files.forEach((filename) => {
-    const content = fs.readFileSync(path.join(TEST_PROJECT_ROOT_PATH, filename), 'utf8');
-    compile(TEST_PROJECT_ROOT_PATH, filename, content);
-  });
   t.pass();
 });
 

@@ -1,5 +1,5 @@
 import { log } from '../../utils/util';
-import { config } from '../../config/index';
+import { config } from '../../config';
 
 Page({
   data: {

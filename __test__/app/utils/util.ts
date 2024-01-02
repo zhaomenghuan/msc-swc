@@ -1,3 +1,5 @@
+const { debug } = require('@msc/utils');
+
 export function log(message: string) {
-  console.info(message);
+  debug(message);
 }

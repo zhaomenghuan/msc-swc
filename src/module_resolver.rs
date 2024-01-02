@@ -1,5 +1,5 @@
-use crate::utils::normalize_path;
 use std::collections::HashSet;
+use std::fs;
 use std::path::{Path, PathBuf};
 use swc_core::{
   atoms::JsWord,
@@ -11,6 +11,8 @@ use swc_core::{
     visit::{VisitMut, VisitMutWith},
   },
 };
+
+use crate::utils::normalize_path;
 
 static DEFAULT_EXTENSIONS: Lazy<Vec<&'static str>> =
   Lazy::new(|| vec!["js", "ts", "jsx", "tsx", "json"]);
@@ -79,11 +81,36 @@ fn resolve_node_modules_file(
       break;
     }
     let package_file_path = path.join("node_modules").join(&required_file_path);
-    let resolved_file_path = resolve_file_path(package_file_path);
+    let resolved_file_path = resolve_file_path(package_file_path.clone());
     if resolved_file_path.is_some() {
       file_absolute_path = resolved_file_path.clone();
       break;
     }
+
+    // 处理 package.json main 入口逻辑
+    let package_json_path = package_file_path.join("package.json");
+    if package_json_path.exists() {
+      let package_json = fs::read_to_string(&package_json_path).unwrap();
+      let package: serde_json::Value = serde_json::from_str(&package_json).unwrap();
+      // 解析 main 字段
+      if let Some(main) = package.get("main") {
+        let main_path = package_file_path.join(main.as_str().unwrap());
+        if main_path.exists() {
+          file_absolute_path = Some(main_path);
+          break;
+        }
+      }
+
+      // 解析 module 字段
+      if let Some(module) = package.get("module") {
+        let module_path = package_file_path.join(module.as_str().unwrap());
+        if module_path.exists() {
+          file_absolute_path = Some(module_path);
+          break;
+        }
+      }
+    }
+
     parent_path = path.parent();
   }
 

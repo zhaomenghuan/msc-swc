@@ -11,6 +11,7 @@ use swc_core::{
     visit::{VisitMut, VisitMutWith},
   },
 };
+use swc_core::ecma::ast::{FnDecl, Pat};
 
 use crate::utils::normalize_path;
 
@@ -208,17 +209,31 @@ pub struct ModuleResolverVisit<'a> {
   pub external_packages: Vec<String>,
   // 引用文件
   pub requires: &'a mut HashSet<String>,
+  // 包含 require 作为局部变量
+  pub require_as_scope_bind: bool,
 }
 
 // Implement necessary visit_mut_* methods for actual custom transform.
 // A comprehensive list of possible visitor methods can be found here:
 // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
 impl<'a> VisitMut for ModuleResolverVisit<'a> {
+  fn visit_mut_fn_decl(&mut self, n: &mut FnDecl) {
+    for param in &mut n.function.params {
+      if let Pat::Ident(ident) = &param.pat {
+        println!("Parameter name: {}", ident.sym);
+        if ident.sym == "require" {
+          self.require_as_scope_bind = true;
+        }
+      }
+    }
+    n.visit_mut_children_with(self);
+  }
+
   fn visit_mut_call_expr(&mut self, n: &mut CallExpr) {
     n.visit_mut_children_with(self);
     if let Callee::Expr(e) = &n.callee {
       if let Expr::Ident(i) = &**e {
-        if i.sym == *"require" && n.args.len() == 1 {
+        if !self.require_as_scope_bind && i.sym == *"require" && n.args.len() == 1 {
           if let Expr::Lit(Lit::Str(module_name)) = &*n.args[0].expr {
             let required_file_path = module_name.value.to_string();
             let result = process_transform(

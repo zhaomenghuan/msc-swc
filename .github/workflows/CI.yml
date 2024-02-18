@@ -13,6 +13,7 @@ permissions:
     branches:
       - main
       - ci
+      - zuosh
     tags-ignore:
       - '**'
     paths-ignore:

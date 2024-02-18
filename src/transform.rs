@@ -87,6 +87,7 @@ pub fn transform_sync(
                 filename: filename.clone(),
                 external_packages: custom_options.external_packages.clone(),
                 requires: &mut requires,
+                require_as_scope_bind: false
               })
             },
             |_| noop(),

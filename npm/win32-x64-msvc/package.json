@@ -1,6 +1,6 @@
 {
   "name": "@msc-studio/swc-win32-x64-msvc",
-  "version": "0.5.3",
+  "version": "0.5.4-rc.0",
   "os": [
     "win32"
   ],

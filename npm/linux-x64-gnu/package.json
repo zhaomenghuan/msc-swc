@@ -1,6 +1,6 @@
 {
   "name": "@msc-studio/swc-linux-x64-gnu",
-  "version": "0.5.3",
+  "version": "0.5.4-rc.0",
   "os": [
     "linux"
   ],

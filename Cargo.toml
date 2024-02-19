@@ -1,7 +1,7 @@
 [package]
 authors = ["zhaomenghuan <zhaomenghuan@foxmail.com>"]
 edition = "2021"
-name    = "msc_swc"
+name = "msc_swc"
 version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -10,37 +10,38 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-anyhow = { version = "1.0.66", features = [] }
-napi = { version = "2", default-features = false, features = [
-  "napi3",
-  "serde-json",
+anyhow = { version = "1.0.79", features = [] }
+napi = { version = "2.15.1", default-features = false, features = [
+    "napi3",
+    "serde-json",
 ] }
-napi-derive = { version = "2", default-features = false, features = [
-  "type-def",
+napi-derive = { version = "2.15.0", default-features = false, features = [
+    "type-def",
 ] }
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["unbounded_depth"] }
-tracing = { version = "0.1.37", features = ["release_max_level_info"] }
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = { version = "1.0.113", features = ["unbounded_depth"] }
+tracing = { version = "0.1.40", features = ["release_max_level_info"] }
 tracing-futures = "0.2.5"
-tracing-subscriber = { version = "0.3.9", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 
-swc_core = { version = "0.87.7", features = [
-  "allocator_node",
-  "ecma_ast",
-  "ecma_codegen",
-  "ecma_ast_serde",
-  "common_concurrent",
-  "bundler",
-  "ecma_loader",
-  "ecma_transforms",
-  "ecma_visit",
-  "base_node",
-  "base_concurrent",
+swc_core = { version = "0.90.3", features = [
+    "allocator_node",
+    "ecma_ast",
+    "ecma_codegen",
+    "ecma_ast_serde",
+    "common_concurrent",
+    "bundler",
+    "ecma_loader",
+    "ecma_transforms",
+    "ecma_visit",
+    "base_node",
+    "base_concurrent",
 ] }
 swc_malloc = "0.5.10"
+bytes = "1.5.0"
 
 [build-dependencies]
-napi-build = "2"
+napi-build = "2.1.0"
 
 [profile.release]
 lto = false

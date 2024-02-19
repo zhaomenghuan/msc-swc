@@ -224,7 +224,7 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
   /// ```
   /// function add(require)
   /// {
-  ///   require("xxx")
+  ///   require("./xxx")
   /// }
   /// ```
   fn visit_mut_fn_decl(&mut self, n: &mut FnDecl) {

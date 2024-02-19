@@ -56,16 +56,61 @@ test('transformSync require 作为参数', (t) => {
     const mod_a = require('./utils/util.ts')
     function scopeRequire(require, b) {
         require('aaa')
-
+    
         function scopeRequireB(require) {
-            require('bbb');
+        require('bbb')
         }
-
+    
         scopeRequireB(req)
     }
     
-    const result = scopeRequire(req, param);
-    const mod_b = require('./pages/index/index.js')
+    __DEFINE__(
+        1640576341559,
+        function (require, module, exports) {
+        const Logan = require('@dp/logan-wxapp')
+    
+        function config(config) {
+            Logan.config(config)
+        }
+    
+        function write(log) {
+            log = log || {}
+            let logString = log.logString || ''
+            let logType = log.logType || 'default'
+            if (typeof logString !== 'string' || typeof logType !== 'string') {
+            return
+            }
+            Logan.log(logString, logType)
+        }
+    
+        function event(log) {
+            console.log('log event not support.')
+        }
+    
+        function upload(config) {
+            Logan.report(config)
+        }
+    
+        function flush() {
+            console.log('flush not support.')
+        }
+    
+        module.exports = {
+            config,
+            write,
+            event,
+            upload,
+            flush,
+        }
+        },
+        function (modId) {
+        var map = {}
+        return __REQUIRE__(map[modId], modId)
+        }
+    )
+    
+    const result = scopeRequire(req, param)
+    const mod_b = require('./pages/index/index.js')  
   `;
   const result = compile(TEST_PROJECT_ROOT_PATH, 'app.js', content);
   const requires = result?.metadata?.requires;

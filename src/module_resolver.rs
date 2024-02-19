@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use swc_core::ecma::ast::{FnDecl, Pat};
+use swc_core::ecma::ast::{FnDecl, FnExpr, Pat};
 use swc_core::{
   atoms::JsWord,
   common::{errors::HANDLER, sync::Lazy, FileName, Span, DUMMY_SP},
@@ -218,7 +218,7 @@ pub struct ModuleResolverVisit<'a> {
 // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
 impl<'a> VisitMut for ModuleResolverVisit<'a> {
   ///
-  /// # require 作为函数参数
+  /// # require 作为具名函数参数
   ///
   /// require 作为函数参数时，不解析依赖，对此类函数层级做标记，当包含 require 为参数的函数层级为 0 时，收集依赖
   /// ```
@@ -229,12 +229,45 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
   /// ```
   fn visit_mut_fn_decl(&mut self, n: &mut FnDecl) {
     let original_require_as_scope_bind_depth = self.require_as_scope_bind_depth;
-    for param in &mut n.function.params {
+    let has_require_param = n.function.params.iter().any(|param| {
       if let Pat::Ident(ident) = &param.pat {
-        if ident.sym == "require" {
-          self.require_as_scope_bind_depth += 1;
-        }
+        ident.sym == "require"
+      } else {
+        false
       }
+    });
+
+    // 具名函数包含 require 为参数
+    if has_require_param {
+      self.require_as_scope_bind_depth += 1;
+    }
+
+    n.visit_mut_children_with(self);
+    self.require_as_scope_bind_depth = original_require_as_scope_bind_depth;
+  }
+
+  ///
+  /// # require 作为匿名函数参数
+  ///
+  /// require 作为函数参数时，不解析依赖，对此类函数层级做标记，当包含 require 为参数的函数层级为 0 时，收集依赖
+  /// ```
+  /// funCall(a, function(require) {
+  ///   require("./xxx")
+  /// })
+  /// ```
+  fn visit_mut_fn_expr(&mut self, n: &mut FnExpr) {
+    let original_require_as_scope_bind_depth = self.require_as_scope_bind_depth;
+    let has_require_param = n.function.params.iter().any(|param| {
+      if let Pat::Ident(ident) = &param.pat {
+        ident.sym == "require"
+      } else {
+        false
+      }
+    });
+
+    // 匿名函数包含 require 为参数
+    if has_require_param {
+      self.require_as_scope_bind_depth += 1;
     }
 
     n.visit_mut_children_with(self);
@@ -245,6 +278,9 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
     n.visit_mut_children_with(self);
     if let Callee::Expr(e) = &n.callee {
       if let Expr::Ident(i) = &**e {
+        if i.sym == *"require" {
+          println!("require 函数调用：{}", self.require_as_scope_bind_depth)
+        }
         if self.require_as_scope_bind_depth == 0 && i.sym == *"require" && n.args.len() == 1 {
           if let Expr::Lit(Lit::Str(module_name)) = &*n.args[0].expr {
             let required_file_path = module_name.value.to_string();

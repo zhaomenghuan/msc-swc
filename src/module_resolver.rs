@@ -278,9 +278,6 @@ impl<'a> VisitMut for ModuleResolverVisit<'a> {
     n.visit_mut_children_with(self);
     if let Callee::Expr(e) = &n.callee {
       if let Expr::Ident(i) = &**e {
-        if i.sym == *"require" {
-          println!("require 函数调用：{}", self.require_as_scope_bind_depth)
-        }
         if self.require_as_scope_bind_depth == 0 && i.sym == *"require" && n.args.len() == 1 {
           if let Expr::Lit(Lit::Str(module_name)) = &*n.args[0].expr {
             let required_file_path = module_name.value.to_string();

@@ -11,6 +11,7 @@ use swc_core::{
     visit::{VisitMut, VisitMutWith},
   },
 };
+use swc_core::ecma::ast::{FnDecl, Pat};
 
 use crate::utils::normalize_path;
 
@@ -208,17 +209,44 @@ pub struct ModuleResolverVisit<'a> {
   pub external_packages: Vec<String>,
   // 引用文件
   pub requires: &'a mut HashSet<String>,
+  // require 作为函数参数时的函数深度
+  pub require_as_scope_bind_depth: i32,
 }
 
 // Implement necessary visit_mut_* methods for actual custom transform.
 // A comprehensive list of possible visitor methods can be found here:
 // https://rustdoc.swc.rs/swc_ecma_visit/trait.VisitMut.html
 impl<'a> VisitMut for ModuleResolverVisit<'a> {
+    
+    ///
+    /// # require 作为函数参数
+    ///
+    /// require 作为函数参数时，不解析依赖，对此类函数层级做标记，当包含 require 为参数的函数层级为 0 时，收集依赖
+    /// ```
+    /// function add(require)
+    /// {
+    ///   require("xxx")
+    /// }
+    /// ```
+    fn visit_mut_fn_decl(&mut self, n: &mut FnDecl) {
+        let original_require_as_scope_bind_depth = self.require_as_scope_bind_depth;
+        for param in &mut n.function.params {
+          if let Pat::Ident(ident) = &param.pat {
+            if ident.sym == "require" {
+              self.require_as_scope_bind_depth += 1;
+            }
+          }
+        }
+      
+        n.visit_mut_children_with(self);
+        self.require_as_scope_bind_depth = original_require_as_scope_bind_depth;
+      }
+
   fn visit_mut_call_expr(&mut self, n: &mut CallExpr) {
     n.visit_mut_children_with(self);
     if let Callee::Expr(e) = &n.callee {
       if let Expr::Ident(i) = &**e {
-        if i.sym == *"require" && n.args.len() == 1 {
+        if self.require_as_scope_bind_depth == 0 && i.sym == *"require" && n.args.len() == 1 {
           if let Expr::Lit(Lit::Str(module_name)) = &*n.args[0].expr {
             let required_file_path = module_name.value.to_string();
             let result = process_transform(

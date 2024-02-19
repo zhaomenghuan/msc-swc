@@ -50,3 +50,24 @@ test('transformSync 编译引用不存在的 npm ', (t) => {
     t.pass();
   }
 });
+
+test('transformSync require 作为参数', (t) => {
+  const content = `
+    const mod_a = require('./utils/util.ts')
+    function scopeRequire(require, b) {
+        require('aaa')
+
+        function scopeRequireB(require) {
+            require('bbb');
+        }
+
+        scopeRequireB(req)
+    }
+    
+    const result = scopeRequire(req, param);
+    const mod_b = require('./pages/index/index.js')
+  `;
+  const result = compile(TEST_PROJECT_ROOT_PATH, 'app.js', content);
+  const requires = result?.metadata?.requires;
+  t.assert(Array.isArray(requires) && requires.length === 2);
+});

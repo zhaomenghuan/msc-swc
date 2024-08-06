@@ -1,6 +1,6 @@
 {
   "name": "@msc-studio/swc-darwin-arm64",
-  "version": "0.5.7",
+  "version": "0.5.10",
   "os": [
     "darwin"
   ],

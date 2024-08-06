@@ -116,3 +116,12 @@ test('transformSync require 作为参数', (t) => {
   const requires = result?.metadata?.requires;
   t.assert(Array.isArray(requires) && requires.length === 2);
 });
+
+test('transformSync 收集 export from 依赖', (t) => {
+  const content = `
+      export {test} from './utils/util.ts'
+    `;
+  const result = compile(TEST_PROJECT_ROOT_PATH, 'app.js', content);
+  const requires = result?.metadata?.requires;
+  t.assert(Array.isArray(requires) && requires.length === 1);
+});

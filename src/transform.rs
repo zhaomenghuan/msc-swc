@@ -81,16 +81,16 @@ pub fn transform_sync(
             handler,
             &options,
             SingleThreadedComments::default(),
-            |_| {
-              as_folder(ModuleResolverVisit {
-                cwd: options.cwd.clone(),
-                filename: filename.clone(),
-                external_packages: custom_options.external_packages.clone(),
-                requires: &mut requires,
-                require_as_scope_bind_depth: 0,
-              })
-            },
             |_| noop(),
+            |_| {
+                as_folder(ModuleResolverVisit {
+                  cwd: options.cwd.clone(),
+                  filename: filename.clone(),
+                  external_packages: custom_options.external_packages.clone(),
+                  requires: &mut requires,
+                  require_as_scope_bind_depth: 0,
+                })
+              },
           )
           .unwrap();
 

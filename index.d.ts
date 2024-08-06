@@ -7,7 +7,7 @@ export interface TransformOutput {
   code: string;
   map?: string;
 }
-export function minifySync(code: Buffer, opts: Buffer): TransformOutput;
+export declare function minifySync(code: Buffer, opts: Buffer): TransformOutput;
 export interface TransformerCustomOptions {
   externalPackages: Array<string>;
 }
@@ -19,4 +19,4 @@ export interface TransformOutput {
   map?: string;
   metadata: Metadata;
 }
-export function transformSync(s: string, opts: Buffer, customOpts?: Buffer | undefined | null): TransformOutput;
+export declare function transformSync(s: string, opts: Buffer, customOpts?: Buffer | undefined | null): TransformOutput;

@@ -1,6 +1,6 @@
 {
   "name": "@msc-studio/swc",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "msc swc package with napi-rs",
   "main": "index.js",
   "repository": {

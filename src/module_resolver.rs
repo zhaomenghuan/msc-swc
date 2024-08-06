@@ -75,7 +75,7 @@ fn resolve_node_modules_file(
 
   let mut parent_path = source_file_absolute_path.parent();
   while let Some(path) = parent_path {
-    if !path.starts_with(&cwd.clone()) {
+    if !path.starts_with(cwd.clone()) {
       break;
     }
     let package_file_path = path.join("node_modules").join(&required_file_path);

@@ -3,7 +3,10 @@
   "version": "0.5.7",
   "description": "msc swc package with napi-rs",
   "main": "index.js",
-  "repository": "https://github.com/zhaomenghuan/msc-swc.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhaomenghuan/msc-swc.git"
+  },
   "license": "MIT",
   "keywords": [
     "napi-rs",

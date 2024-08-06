@@ -49,7 +49,7 @@ pub fn transform_sync(
 
   let mut options: Options = get_deserialized(&opts)?;
   let custom_options: TransformerCustomOptions = if custom_opts.is_some() {
-    get_deserialized(&custom_opts.unwrap())?
+    get_deserialized(custom_opts.unwrap())?
   } else {
     TransformerCustomOptions::default()
   };
